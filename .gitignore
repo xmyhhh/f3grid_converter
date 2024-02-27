@@ -1,0 +1,17 @@
+# Git Ignore Rules for raytracing.github.io
+
+bin
+
+build
+
+out
+.vs
+
+!third/**
+
+.idea
+.cmake
+cmake-build-debug
+cmake-build-debug-visual-studio
+
+config
