@@ -10,7 +10,8 @@ set(CMAKE_BUILD_DIRECTORY  "${CMAKE_HOME_DIRECTORY}/build")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_HOME_DIRECTORY}/bin")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-#set(BUILD_SHARED_LIBS OFF)
+set(BUILD_SHARED_LIBS OFF)
+
 
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} third/CGAL)
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} C:/local/boost_1_84_0/lib64-msvc-14.0/cmake/Boost-1.84.0)
@@ -20,10 +21,10 @@ include_directories(src)
 
 include_directories(third)
 
+set(VTK_SMP_ENABLE_STDTHREAD OFF)
 add_subdirectory(third/VTK)
 
 include_directories(third/CLI11)
-
 
 include_directories(third/nlohmann)
 

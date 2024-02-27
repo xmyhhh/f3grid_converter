@@ -8,6 +8,7 @@
 #include "config/config_loader.h"
 #include "utils/log/log.h"
 #include "utils/file/file_path.h"
+#include "mesh loader/mesh_loader.h"
 
 #define  ASSERT_MSG(condition, msg) \
     if((condition) == false) { log_print(msg) ; assert(false);}
@@ -26,12 +27,11 @@ int main(int argc, char **argv) {
     CLI11_PARSE(app, argc, argv);
 
     if (strcmp(file_path.c_str(), "default") == 0) {
-        log_print("ERROR: input config path can not be null!");
-        return 0;
+        log_print("input config path can is null, use current dir!");
+        file_path = "./default_config.json";
     }
 
-
-    if (is_file_exist(file_path) == false) {
+    if (!is_file_exist(file_path)) {
         log_print("create config file in path:" + file_path);
         Config_Loader::create_default_config_file(file_path);
         return 0;
@@ -44,6 +44,20 @@ int main(int argc, char **argv) {
         ASSERT_MSG(create_directory_recursive(config.save_output_path, err), "ERROR: can not create the output dir!");
     }
 
+
+    for (auto f3grid_file_path: config.input_file_path) {
+        Mesh_Loader::FileData data;
+        bool res = Mesh_Loader::load_f3grid(f3grid_file_path.c_str(), data);
+        if (res && data.numberOfPoints != 0) {
+            log_print("load frgrid file success: " + f3grid_file_path);
+
+        }
+        else{
+            log_print("load frgrid file error: " + f3grid_file_path);
+            break;
+        };
+        int aa = 0;
+    }
 
     return 0;
 }
