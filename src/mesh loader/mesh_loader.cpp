@@ -4,6 +4,7 @@
 #include <set>
 #include <map>
 #include <bitset>
+#include <array>
 
 #include <vtkCellData.h>
 #include <vtkCellTypes.h>
@@ -23,7 +24,10 @@
 #include <vtkXMLRectilinearGridReader.h>
 #include <vtkXMLStructuredGridReader.h>
 #include <vtkXMLUnstructuredGridReader.h>
+#include <vtkXMLUnstructuredGridWriter.h>
 #include <vtksys/SystemTools.hxx>
+#include <vtkTetra.h>
+#include <vtkTriangle.h>
 
 #include "utils/file/file_path.h"
 #include "mesh_loader.h"
@@ -152,8 +156,8 @@ namespace Mesh_Loader {
         int line_count = 0;
 
         int nverts = 0, iverts = 0;
-        int ntetrahedras = 0, icells = 0;
-        int ntriangles = 0;
+        int ntetrahedras = 0, icells = 0, itetrahedras = 0;
+        int ntriangles = 0, itriangles = 0;
 
         struct Slot {
             //std::string slot_name;
@@ -198,7 +202,6 @@ namespace Mesh_Loader {
                         F_slot_map[s_3].index_groups[s_1].push_back(index);
                     }
                 }
-
             }
             else if (strcmp(sub05.c_str(), "ZGROUP") == 0) {
                 char g_name[35];
@@ -232,8 +235,9 @@ namespace Mesh_Loader {
         data.numberOfCell = ntetrahedras + ntriangles;
         data.cellList = new Cell[data.numberOfCell];
 
-        data.cellDataArray.resize(2);
-
+        //load point and cell
+        std::map<int, int> tet_reindex_map;
+        std::map<int, int> triangle_reindex_map;
         while ((bufferp = read_line(buffer, fp, &line_count)) != NULL) {
             char string[15];
             char *ptr;
@@ -259,17 +263,17 @@ namespace Mesh_Loader {
                        &p2,
                        &p3
                 );
-
                 data.cellList[icells].pointList = new int[4];
                 data.cellList[icells].numberOfPoints = 4;
-
                 auto Cell_point = &data.cellList[icells].pointList[0];
                 Cell_point[0] = p0 - 1;
                 Cell_point[1] = p1 - 1;
                 Cell_point[2] = p2 - 1;
                 Cell_point[3] = p3 - 1;
 
+                tet_reindex_map[itetrahedras] = icells;
                 icells++;
+                itetrahedras++;
             }
             else if (strcmp(sub03.c_str(), "F T3") == 0) {
 
@@ -288,13 +292,45 @@ namespace Mesh_Loader {
                 Cell_point[1] = p1 - 1;
                 Cell_point[2] = p2 - 1;
 
+                triangle_reindex_map[itriangles] = icells;
                 icells++;
+                itriangles++;
             }
         }
 
+
+        int slot_total_size = Z_slot_map.size() + F_slot_map.size();
+        data.cellDataArray.resize(slot_total_size);
+        for (int i = 0; i < slot_total_size; i++) {
+            auto &data_array = data.cellDataArray[i];
+            if (i < Z_slot_map.size()) {
+                // make z cellDataArray
+                auto it = Z_slot_map.begin();
+                std::advance(it, i);
+                data_array.name = it->first;
+                data_array.content.resize(data.numberOfCell);
+                for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
+                    for (int j = 0; j < iter->second.size(); j++) {
+                        data_array.content[tet_reindex_map[j]] = iter->first;
+                    }
+                }
+            }
+            else {
+                // make f cellDataArray
+                auto it = F_slot_map.begin();
+                std::advance(it, i - Z_slot_map.size());
+                data_array.name = it->first;
+                data_array.content.resize(data.numberOfCell);
+                for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
+                    for (int j = 0; j < iter->second.size(); j++) {
+                        data_array.content[triangle_reindex_map[j]] = iter->first;
+                    }
+                }
+            }
+        }
+
+
         fclose(fp);
-
-
         log_print("* load_f3grid success!");
         log_print("* tetrahedra number: " + std::to_string(ntetrahedras));
         log_print("* triangle number: " + std::to_string(ntriangles));
@@ -317,8 +353,48 @@ namespace Mesh_Loader {
 
 
     bool save_vtu(const char *out_file_path, const FileData &data) {
+        vtkNew<vtkPoints> points;
+        vtkNew<vtkTetra> tetra;
+        vtkNew<vtkTriangle> triangle;
+        vtkNew<vtkCellArray> cellArray;
+        vtkNew<vtkUnsignedCharArray> celltypes;
+        celltypes->SetNumberOfComponents(1);
+        celltypes->SetNumberOfValues(data.numberOfCell);
 
+        for (int i = 0; i < data.numberOfPoints; i++) {
+            points->InsertNextPoint(data.pointList[i * 3], data.pointList[i * 3 + 1], data.pointList[i * 3 + 2]);
+        }
+        for (int i = 0; i < data.numberOfCell; i++) {
+            Cell &cell = data.cellList[i];
+            if (cell.numberOfPoints == 4) {
+                tetra->GetPointIds()->SetId(0, cell.pointList[0]);
+                tetra->GetPointIds()->SetId(1, cell.pointList[1]);
+                tetra->GetPointIds()->SetId(2, cell.pointList[2]);
+                tetra->GetPointIds()->SetId(3, cell.pointList[3]);
+                cellArray->InsertNextCell(tetra);
+                celltypes->SetValue(i, VTK_TETRA);
+            }
+            else if (cell.numberOfPoints == 3) {
+                triangle->GetPointIds()->SetId(0, cell.pointList[0]);
+                triangle->GetPointIds()->SetId(1, cell.pointList[1]);
+                triangle->GetPointIds()->SetId(2, cell.pointList[2]);
+                cellArray->InsertNextCell(triangle);
+                celltypes->SetValue(i, VTK_TRIANGLE);
+            }
+            else {
+                ASSERT_MSG(false, "ERROR: unsupport input");
+            }
+        }
 
+        vtkNew<vtkUnstructuredGrid> unstructuredGrid;
+        unstructuredGrid->SetPoints(points);
+        unstructuredGrid->SetCells(celltypes, cellArray);
+
+        // Write file.
+        vtkNew<vtkXMLUnstructuredGridWriter> writer;
+        writer->SetFileName(out_file_path);
+        writer->SetInputData(unstructuredGrid);
+        writer->Write();
         return true;
     }
 

@@ -17,9 +17,6 @@ Config config;
 
 int main(int argc, char **argv) {
 
-    //Mesh_Loader:: FileData data;
-    //Mesh_Loader::load_vtu("C:\\Users\\xmyci\\Desktop\\222.vtu",data);
-
     CLI::App app{"App description"};
     argv = app.ensure_utf8(argv);
 
@@ -38,7 +35,8 @@ int main(int argc, char **argv) {
         log_print("create config file in path:" + file_path);
         Config_Loader::create_default_config_file(file_path);
         return 0;
-    } else {
+    }
+    else {
         bool r = Config_Loader::load_config_file(file_path, config);
         if (!r)
             return -1;
@@ -54,11 +52,14 @@ int main(int argc, char **argv) {
         if (res && data.numberOfPoints != 0) {
             log_print("load frgrid file success: " + f3grid_file_path);
         }
-        else{
+        else {
             log_print("load frgrid file error: " + f3grid_file_path);
             break;
         };
-        int aa = 0;
+        std::string file_name = get_file_name(f3grid_file_path, false);
+        std::string full_path = path_join(config.save_output_path, file_name + ".vtu");
+        Mesh_Loader::save_vtu(full_path.c_str(), data);
+        log_print("export vtu success in path: " + full_path);
     }
 
     return 0;
