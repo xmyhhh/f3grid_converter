@@ -35,6 +35,8 @@
 #include "mesh_loader.h"
 #include "utils/log/log.h"
 #include "utils/string/string_utils.h"
+#include "config/config_loader.h"
+
 
 #define  ASSERT_MSG(condition, msg) \
     if((condition) == false) { log_print(msg) ; assert(false);}
@@ -182,9 +184,13 @@ namespace Mesh_Loader {
                 ntetrahedras++;
             }
             else if (strcmp(sub03.c_str(), "F T3") == 0) {
+                if (config.export_face_related == false)
+                    continue;
                 ntriangles++;
             }
             else if (strcmp(sub05.c_str(), "FGROUP") == 0) {
+                if (config.export_face_related == false)
+                    continue;
                 char g_name[35];
                 char slot_name[35];
                 sscanf(bufferp, "FGROUP \"%s\" SLOT \"%s\"", &g_name, &slot_name);
@@ -278,6 +284,8 @@ namespace Mesh_Loader {
                 itetrahedras++;
             }
             else if (strcmp(sub03.c_str(), "F T3") == 0) {
+                if (config.export_face_related == false)
+                    continue;
 
                 int p0, p1, p2;
                 sscanf(bufferp, "%*s %*s %*s %d %d %d",
@@ -380,6 +388,7 @@ namespace Mesh_Loader {
                 celltypes->SetValue(i, VTK_TETRA);
             }
             else if (cell.numberOfPoints == 3) {
+
                 triangle->GetPointIds()->SetId(0, cell.pointList[0]);
                 triangle->GetPointIds()->SetId(1, cell.pointList[1]);
                 triangle->GetPointIds()->SetId(2, cell.pointList[2]);

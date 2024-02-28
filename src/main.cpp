@@ -9,14 +9,16 @@
 #include "utils/log/log.h"
 #include "utils/file/file_path.h"
 #include "mesh loader/mesh_loader.h"
+#include "algorithm/extract_six_surface.h"
 
 #define  ASSERT_MSG(condition, msg) \
     if((condition) == false) { log_print(msg) ; assert(false);}
 
 
+Config config;
 
 int main(int argc, char **argv) {
-    Config config;
+
     CLI::App app{"App description"};
     argv = app.ensure_utf8(argv);
 
@@ -60,6 +62,21 @@ int main(int argc, char **argv) {
         std::string full_path = path_join(config.save_output_path, file_name + ".vtu");
         Mesh_Loader::save_vtu(full_path.c_str(), data);
         log_print("export vtu success in path: " + full_path);
+
+        if (config.export_six_surface) {
+            Unwrap up;
+            if (config.export_face_related) {
+                config.export_face_related = false;
+                Mesh_Loader::FileData data_new;
+                Mesh_Loader::load_f3grid(f3grid_file_path.c_str(), data_new);
+                up.init_from_filedata(data_new);
+            }
+            else {
+                up.init_from_filedata(data);
+            }
+            Unwrap_01(up);
+            up.save_file("C:/Users/xmy/Desktop/VTK");
+        }
     }
 
     return 0;
