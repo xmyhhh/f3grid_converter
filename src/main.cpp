@@ -13,10 +13,10 @@
 #define  ASSERT_MSG(condition, msg) \
     if((condition) == false) { log_print(msg) ; assert(false);}
 
-Config config;
+
 
 int main(int argc, char **argv) {
-
+    Config config;
     CLI::App app{"App description"};
     argv = app.ensure_utf8(argv);
 
@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
     CLI11_PARSE(app, argc, argv);
 
     if (strcmp(file_path.c_str(), "default") == 0) {
-        log_print("input config path can is null, use current dir!");
+        log_print("input config path is null, use current dir!");
         file_path = "./default_config.json";
     }
 

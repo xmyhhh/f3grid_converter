@@ -28,6 +28,8 @@
 #include <vtksys/SystemTools.hxx>
 #include <vtkTetra.h>
 #include <vtkTriangle.h>
+#include <vtkStringArray.h>
+
 
 #include "utils/file/file_path.h"
 #include "mesh_loader.h"
@@ -364,6 +366,7 @@ namespace Mesh_Loader {
         for (int i = 0; i < data.numberOfPoints; i++) {
             points->InsertNextPoint(data.pointList[i * 3], data.pointList[i * 3 + 1], data.pointList[i * 3 + 2]);
         }
+
         for (int i = 0; i < data.numberOfCell; i++) {
             Cell &cell = data.cellList[i];
             if (cell.numberOfPoints == 4) {
@@ -390,10 +393,24 @@ namespace Mesh_Loader {
         unstructuredGrid->SetPoints(points);
         unstructuredGrid->SetCells(celltypes, cellArray);
 
+        vtkCellData *g_celldata = unstructuredGrid->GetCellData();
+        for (int i = 0; i < data.cellDataArray.size(); i++) {
+            vtkStringArray *array = vtkStringArray::New();
+
+            auto &celldata = data.cellDataArray[i];
+            array->SetName(celldata.name.c_str());
+            array->SetNumberOfValues(celldata.content.size());
+            for (int j = 0; j < celldata.content.size(); j++) {
+                array->SetValue(j, celldata.content[j].c_str());
+            }
+            g_celldata->AddArray(array);
+        }
+
         // Write file.
         vtkNew<vtkXMLUnstructuredGridWriter> writer;
         writer->SetFileName(out_file_path);
         writer->SetInputData(unstructuredGrid);
+        writer->SetDataModeToAscii();
         writer->Write();
         return true;
     }
