@@ -17,8 +17,8 @@ Config config;
 
 int main(int argc, char **argv) {
 
-    Mesh_Loader:: FileData data;
-    Mesh_Loader::load_vtu("C:\\Users\\xmyci\\Desktop\\222.vtu",data);
+    //Mesh_Loader:: FileData data;
+    //Mesh_Loader::load_vtu("C:\\Users\\xmyci\\Desktop\\222.vtu",data);
 
     CLI::App app{"App description"};
     argv = app.ensure_utf8(argv);
@@ -53,7 +53,6 @@ int main(int argc, char **argv) {
         bool res = Mesh_Loader::load_f3grid(f3grid_file_path.c_str(), data);
         if (res && data.numberOfPoints != 0) {
             log_print("load frgrid file success: " + f3grid_file_path);
-
         }
         else{
             log_print("load frgrid file error: " + f3grid_file_path);

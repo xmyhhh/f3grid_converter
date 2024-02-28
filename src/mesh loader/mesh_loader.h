@@ -23,18 +23,19 @@ namespace Mesh_Loader {
         int numberOfPoints = 3; //3表示三角形
         int *pointList;
     };
-
+    struct CellDataArray{
+        std::string name;
+        std::vector<std::string> content;
+    };
 
     struct FileData {
         int numberOfPoints = 0;
         double *pointList;
 
-        std::vector<std::string> cellattrname;
         int numberOfCell = 0;
         Cell *cellList;
 
-        std::vector<std::vector<std::string>> cell_data_array;
-
+        std::vector<CellDataArray> cellDataArray;
 
         ~FileData() {
 

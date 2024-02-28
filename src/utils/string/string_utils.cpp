@@ -5,7 +5,12 @@
 
 
 std::vector<std::string> string_split(std::string s, std::string delimiter) {
+    if (s.back() == '\n') {
+        s.pop_back();
+    }
+
     std::vector<std::string> res;
+
     int index = 0;
 
     while (true) {
@@ -20,10 +25,15 @@ std::vector<std::string> string_split(std::string s, std::string delimiter) {
     return res;
 };
 
+std::string string_shrink(std::string s) {
+    s.pop_back();
+    s = s.substr(1, s.size());
+    return s;
+};
+
 std::string string_concat(std::vector<std::string> string_array, std::string delimiter) {
     std::string res = string_array[0];
     for (int i = 1; i < string_array.size(); i++)
         res += (delimiter + string_array[i]);
-
     return res;
 };
