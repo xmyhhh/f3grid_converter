@@ -18,6 +18,9 @@ namespace Mesh_Loader {
         F3GRID,
         UNKNOW
     };
+    struct Group{
+        std::string g_name;
+    };
 
     struct Cell {
         int numberOfPoints = 3; //3表示三角形
