@@ -17,6 +17,9 @@ Config config;
 
 int main(int argc, char **argv) {
 
+    Mesh_Loader:: FileData data;
+    Mesh_Loader::load_vtu("C:\\Users\\xmyci\\Desktop\\222.vtu",data);
+
     CLI::App app{"App description"};
     argv = app.ensure_utf8(argv);
 

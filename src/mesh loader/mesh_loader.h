@@ -46,7 +46,7 @@ namespace Mesh_Loader {
 
 
     bool load_f3grid(const char *in_file_path, FileData &data);
-
+    bool load_vtu(const char *in_file_path, FileData &data);
 
     bool save_vtu(const char *out_file_path, const FileData &data);
 
