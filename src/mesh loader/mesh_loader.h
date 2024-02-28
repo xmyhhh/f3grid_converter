@@ -18,28 +18,23 @@ namespace Mesh_Loader {
         F3GRID,
         UNKNOW
     };
-    struct Group{
-        std::string g_name;
-    };
 
     struct Cell {
         int numberOfPoints = 3; //3表示三角形
         int *pointList;
-
-        double *cellattr;
     };
 
-    struct CellBlock{
-        std::vector<std::string> cellattrname;
-        int numberOfCell = 0;
-        Cell *cellList;
-    };
 
     struct FileData {
         int numberOfPoints = 0;
         double *pointList;
 
-        std::vector<CellBlock> cellblocks;
+        std::vector<std::string> cellattrname;
+        int numberOfCell = 0;
+        Cell *cellList;
+
+        std::vector<std::vector<std::string>> cell_data_array;
+
 
         ~FileData() {
 

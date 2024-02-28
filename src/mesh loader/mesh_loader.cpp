@@ -67,19 +67,6 @@ namespace Mesh_Loader {
         reader->Update();
         reader->GetOutput()->Register(reader);
         vtkUnstructuredGrid *g = reader->GetOutput();
-        vtkCellData *g_celldata = g->GetCellData();
-        int array_number = g_celldata->GetNumberOfArrays();
-        vtkAbstractArray *array_0 = g_celldata->GetAbstractArray(0);
-        //g_celldata->GetAbstractArray(0)->GetDataType () -> 13
-        //g_celldata->GetAbstractArray(0)->GetNumberOfValues() ->1558755
-
-        std::vector<std::string> s(g_celldata->GetAbstractArray(0)->GetNumberOfValues());
-        for (int i = 0; i < g_celldata->GetAbstractArray(0)->GetNumberOfValues(); i++) {
-            vtkStdString *vtkstring = (vtkStdString *) g_celldata->GetAbstractArray(0)->GetVoidPointer(i);
-
-            s[i] = *vtkstring;
-        }
-        //
 
         int numberofcell = g->GetNumberOfCells();
         int numberofpoint = g->GetNumberOfPoints();
@@ -89,45 +76,64 @@ namespace Mesh_Loader {
         int numberofcelltypes = p_vtkCellTypes->GetNumberOfTypes();
         auto p_CellTypesArray = p_vtkCellTypes->GetCellTypesArray();
 
+        //Point
         data.numberOfPoints = numberofpoint;
         data.pointList = new double[numberofpoint * 3];
         for (int i = 0; i < numberofpoint; i++) {
             g->GetPoint(i, &data.pointList[i]);
         }
 
-        data.cellblocks.resize(numberofcelltypes);
-        for (int i = 0; i < numberofcelltypes; i++) {
-            auto &cellblock = data.cellblocks[i];
-            unsigned char celltype = p_CellTypesArray->GetValue(i);
-            if (celltype == 10) {
-                //tete
-                cellblock.numberOfCell = 0;
-                for (int j = 0; j < numberofcell; j++) {
-                    if (g->GetCellType(j) == 10)
-                        cellblock.numberOfCell++;
-                }
-                cellblock.cellList = new Cell[cellblock.numberOfCell];
-                for (int j = 0; j < numberofcell; j++) {
-                    auto &cell = cellblock.cellList[j];
-                    cell.numberOfPoints = 4;
-                    cell.pointList = new int[4];
-                    vtkIdType npts;
-                    vtkIdType const *pts;
-                    g->GetCellPoints(j, npts, pts);
-                    cell.pointList[0] = pts[0];
-                    cell.pointList[1] = pts[1];
-                    cell.pointList[2] = pts[2];
-                    cell.pointList[3] = pts[3];
-                }
-            } else if (celltype == 5) {
+        //Cell
+        data.numberOfCell = numberofcell;
+        data.cellList = new Cell[numberofcell];
+        for (int i = 0; i < numberofcell; i++) {
+            auto &cell = data.cellList[i];
+            if (g->GetCellType(i) == 10) {
+                cell.numberOfPoints = 4;
+                cell.pointList = new int[4];
+                vtkIdType npts;
+                vtkIdType const *pts;
+                g->GetCellPoints(i, npts, pts);
+                assert(npts == 4);
+                cell.pointList[0] = pts[0];
+                cell.pointList[1] = pts[1];
+                cell.pointList[2] = pts[2];
+                cell.pointList[3] = pts[3];
+            } else if (g->GetCellType(i) == 5) {
                 //triangle
                 //vtkCellTypes::GetClassNameFromTypeId
+                cell.numberOfPoints = 3;
+                cell.pointList = new int[3];
+                vtkIdType npts;
+                vtkIdType const *pts;
+                g->GetCellPoints(i, npts, pts);
+                assert(npts == 3);
+                cell.pointList[0] = pts[0];
+                cell.pointList[1] = pts[1];
+                cell.pointList[2] = pts[2];
             } else {
                 ASSERT_MSG(false, "ERROR: unsupport vtu cell type, currently only support tetrahedra and triangle!");
             }
-
-            //cellblock.numberOfCell
         }
+
+        //Cell Data
+        vtkCellData *g_celldata = g->GetCellData();
+        int array_number = g_celldata->GetNumberOfArrays();
+        data.cell_data_array.resize(array_number);
+        for (int i = 0; i < array_number; i++) {
+            vtkAbstractArray *array = g_celldata->GetAbstractArray(i);
+            //g_celldata->GetAbstractArray(0)->GetDataType () -> 13
+            //g_celldata->GetAbstractArray(0)->GetNumberOfValues() ->1558755
+            ASSERT_MSG(array->GetDataType() == 13, "RROR: unsupport vtu celldata type, currently only support string!")
+            std::vector<std::string> &string_array = data.cell_data_array[i];
+            string_array.resize(array->GetNumberOfValues());
+
+            for (int i = 0; i < g_celldata->GetAbstractArray(0)->GetNumberOfValues(); i++) {
+                vtkStdString *vtkstring = (vtkStdString *) g_celldata->GetAbstractArray(0)->GetVoidPointer(i);
+                string_array[i] = *vtkstring;
+            }
+        }
+
 
         return true;
     }
