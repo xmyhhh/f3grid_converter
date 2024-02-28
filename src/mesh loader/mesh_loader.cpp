@@ -201,7 +201,7 @@ namespace Mesh_Loader {
                     for (auto item: split_res_internal) {
                         int index;
                         sscanf(item.c_str(), "%d", &index);
-                        F_slot_map[s_3].index_groups[s_1].push_back(index);
+                        F_slot_map[s_3].index_groups[s_1].push_back(index - 1);
                     }
                 }
             }
@@ -222,7 +222,7 @@ namespace Mesh_Loader {
                     for (auto item: split_res_internal) {
                         int index;
                         sscanf(item.c_str(), "%d", &index);
-                        Z_slot_map[s_3].index_groups[s_1].push_back(index);
+                        Z_slot_map[s_3].index_groups[s_1].push_back(index - 1);
                     }
                 }
             }
@@ -325,6 +325,8 @@ namespace Mesh_Loader {
                 data_array.content.resize(data.numberOfCell);
                 for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
                     for (int j: iter->second) {
+                        if (triangle_reindex_map[j] == 0)
+                            int aaaa = 0;
                         data_array.content[triangle_reindex_map[j]] = iter->first;
                     }
                 }
