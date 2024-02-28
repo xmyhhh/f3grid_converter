@@ -138,8 +138,8 @@ namespace Mesh_Loader {
             data.cellDataArray[i].name = array->GetName();
             std::vector<std::string> &string_array = data.cellDataArray[i].content;
             string_array.resize(array->GetNumberOfValues());
-            for (int i = 0; i < g_celldata->GetAbstractArray(0)->GetNumberOfValues(); i++) {
-                vtkStdString *vtkstring = (vtkStdString *) g_celldata->GetAbstractArray(0)->GetVoidPointer(i);
+            for (int j = 0; j < array->GetNumberOfValues(); j++) {
+                vtkStdString *vtkstring = (vtkStdString *) array->GetVoidPointer(j);
                 string_array[i] = *vtkstring;
             }
         }
@@ -190,7 +190,7 @@ namespace Mesh_Loader {
                 sscanf(bufferp, "FGROUP \"%s\" SLOT \"%s\"", &g_name, &slot_name);
                 auto split_res = string_split(bufferp, " ");
                 auto s_1 = string_shrink(split_res[1]);
-                auto s_3 = string_shrink(split_res[3]);
+                auto s_3 = string_shrink(split_res[3]) + "_F";
                 while ((bufferp = read_line(buffer, fp, &line_count, false)) != NULL) {
                     char char0;
                     sscanf(bufferp, "%c", &char0);
@@ -211,7 +211,7 @@ namespace Mesh_Loader {
                 sscanf(bufferp, "ZGROUP \"%s\" SLOT \"%s\"", &g_name, &slot_name);
                 auto split_res = string_split(bufferp, " ");
                 auto s_1 = string_shrink(split_res[1]);
-                auto s_3 = string_shrink(split_res[3]);
+                auto s_3 = string_shrink(split_res[3]) + "_Z";
                 while ((bufferp = read_line(buffer, fp, &line_count, false)) != NULL) {
                     char char0;
                     sscanf(bufferp, "%c", &char0);
@@ -312,7 +312,7 @@ namespace Mesh_Loader {
                 data_array.name = it->first;
                 data_array.content.resize(data.numberOfCell);
                 for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
-                    for (int j = 0; j < iter->second.size(); j++) {
+                    for (int j: iter->second) {
                         data_array.content[tet_reindex_map[j]] = iter->first;
                     }
                 }
@@ -324,7 +324,7 @@ namespace Mesh_Loader {
                 data_array.name = it->first;
                 data_array.content.resize(data.numberOfCell);
                 for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
-                    for (int j = 0; j < iter->second.size(); j++) {
+                    for (int j: iter->second) {
                         data_array.content[triangle_reindex_map[j]] = iter->first;
                     }
                 }
@@ -398,12 +398,14 @@ namespace Mesh_Loader {
             vtkStringArray *array = vtkStringArray::New();
 
             auto &celldata = data.cellDataArray[i];
+
             array->SetName(celldata.name.c_str());
             array->SetNumberOfValues(celldata.content.size());
             for (int j = 0; j < celldata.content.size(); j++) {
                 array->SetValue(j, celldata.content[j].c_str());
             }
             g_celldata->AddArray(array);
+            //delete (array);
         }
 
         // Write file.
