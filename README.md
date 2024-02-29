@@ -9,7 +9,7 @@ convert .f3grid file to vtu and export six box-like boundary surface if possible
   <div align=center>
   <img src="./pics/released.png" width="95%">
   </div>
-* By compile code: the code compile is simple(A standard cmake project compile pipeline) and all dependency is included in this repository already(you dont need to manuly config any env things or extenal lib), below are some step to compile this code on windows PC
+* By compile code: the code compile is simple(A standard cmake project compile pipeline) and all dependency is included in this repository already(you dont need to manuly config any environment things or external lib), below are some step to compile this code on windows PC
   - install git/vs studio(with c++ desktop development kit and cmake install)
   - git clone this repository by cmd `git clone https://github.com/xmyhhh/f3grid_converter.git`
   - open clone folder by vs studio, if everything is ok, a cmake scan will automaticaly begin
