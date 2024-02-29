@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
                 up.init_from_filedata(data);
             }
             Unwrap_01(up);
-            up.save_file("C:/Users/xmy/Desktop/VTK");
+            up.save_file(config.save_output_path);
         }
     }
 

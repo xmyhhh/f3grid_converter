@@ -7,6 +7,7 @@
 #include "mesh loader/mesh_loader.h"
 #include "basic/data structure/memory_pool.h"
 #include "basic/math/vector3.h"
+#include "config/config_loader.h"
 
 using namespace base_type;
 
@@ -200,110 +201,83 @@ struct Unwrap {
 
     bool save_file(std::string path_base) {
         using namespace Mesh_Loader;
-//        {
-//            //save all
-//            FileData data;
-//
-//            data.numberOfPoints = vertex_pool.size();
-//            data.pointList = new double[data.numberOfPoints * 3];
-//
-//
-//            for (int j = 0; j < vertex_pool.size(); j++) {
-//                const auto &vtx = (Vertex *) vertex_pool[j];
-//                data.pointList[j * 3] = vtx->position.x;
-//                data.pointList[j * 3 + 1] = vtx->position.y;
-//                data.pointList[j * 3 + 2] = vtx->position.z;
-//
-//            }
-//
-//            data.cellattrname.push_back("MaterialIDs");
-//
-//            data.numberOfCell = tetrahedra_pool.size();
-//            data.cellList = new Cell[data.numberOfCell];
-//            for (int j = 0; j < tetrahedra_pool.size(); j++) {
-//                const auto &t = (Tetrahedra *) tetrahedra_pool[j];
-//                data.cellList[j].pointList = new int[4];
-//                data.cellList[j].numberOfPoints = 4;
-//
-//                data.cellList[j].cellattr = new double[1];
-//
-//                data.cellList[j].pointList[0] = t->p1->static_index;
-//                data.cellList[j].pointList[1] = t->p2->static_index;
-//                data.cellList[j].pointList[2] = t->p3->static_index;
-//                data.cellList[j].pointList[3] = t->p4->static_index;
-//
-//                data.cellList[j].cellattr[0] = t->type_id - 1;
-//                //assert(data.cellList[j].attr[0] == get_tet_index(face->disjoin_tet[0] != nullptr ? face->disjoin_tet[0] : face->disjoin_tet[1]));
-//                // assert(data.cellList[j].attr[0] >= 0);
-//            }
-//
-//            save_vtu((path_base + "/" + "domain" + ".vtu").c_str(), data);
-//
-//            data.free_self();
-//        }
+        {
+            FileData data;
+
+            data.numberOfPoints = vertex_pool.size();
+            data.pointList = new double[data.numberOfPoints * 3];
+
+            for (int j = 0; j < vertex_pool.size(); j++) {
+                const auto &vtx = (Vertex *) vertex_pool[j];
+                data.pointList[j * 3] = vtx->position.x;
+                data.pointList[j * 3 + 1] = vtx->position.y;
+                data.pointList[j * 3 + 2] = vtx->position.z;
+
+            }
+
+            //data.cellDataInt["MaterialIDs"];
+            data.numberOfCell = tetrahedra_pool.size();
+            data.cellList = new Cell[data.numberOfCell];
+            for (int j = 0; j < tetrahedra_pool.size(); j++) {
+                const auto &t = (Tetrahedra *) tetrahedra_pool[j];
+                data.cellList[j].pointList = new int[4];
+                data.cellList[j].numberOfPoints = 4;
+
+                //data.cellDataInt["MaterialIDs"].content.push_back(t->type_id - 1);
+                data.cellList[j].pointList[0] = t->p1->static_index;
+                data.cellList[j].pointList[1] = t->p2->static_index;
+                data.cellList[j].pointList[2] = t->p3->static_index;
+                data.cellList[j].pointList[3] = t->p4->static_index;
+
+            }
+            save_vtu((path_base + "/" + "domain" + ".vtu").c_str(), data);
+        }
 
 
-//        for (int i = 0; i < phy_group_array.size(); i++) {
-//            auto &phg = phy_group_array[i];
-//            auto phg_vtx_array = phg.get_vtx();
-//            FileData data;
-//
-//            data.numberOfPoints = phg_vtx_array.size();
-//            data.pointList = new double[data.numberOfPoints * 3];
-//
-//
-//            data.pointattr = new int[data.numberOfPoints];
-//
-//            data.pointattrname.push_back("bulk_node_ids");
-//            data.cellattrname.push_back("bulk_element_ids");
-//
-//            for (int j = 0; j < phg_vtx_array.size(); j++) {
-//                const auto &vtx = phg_vtx_array[j];
-//                data.pointList[j * 3] = vtx->position.x;
-//                data.pointList[j * 3 + 1] = vtx->position.y;
-//                data.pointList[j * 3 + 2] = vtx->position.z;
-//
-//                data.pointattr[j] = vtx->static_index;
-//
-//            }
-//
-//            data.numberOfCell = phg.face_array.size();
-//            data.cellList = new Cell[data.numberOfCell];
-//
-//
-//            for (int j = 0; j < phg.face_array.size(); j++) {
-//                const auto &face = phg.face_array[j];
-//                data.cellList[j].pointList = new int[3];
-//                data.cellList[j].numberOfPoints = 3;
-//
-//                data.cellList[j].cellattr = new double[1];
-//
-//                auto it = std::find(phg_vtx_array.begin(), phg_vtx_array.end(), face->p1);
-//                assert(it != phg_vtx_array.end());
-//
-//                data.cellList[j].pointList[0] = std::distance(phg_vtx_array.begin(), it);
-//                it = std::find(phg_vtx_array.begin(), phg_vtx_array.end(), face->p2);
-//                assert(it != phg_vtx_array.end());
-//                data.cellList[j].pointList[1] = std::distance(phg_vtx_array.begin(), it);
-//                it = std::find(phg_vtx_array.begin(), phg_vtx_array.end(), face->p3);
-//                assert(it != phg_vtx_array.end());
-//                data.cellList[j].pointList[2] = std::distance(phg_vtx_array.begin(), it);
-//
-//                auto get_tet_index = [this](Tetrahedra *t) {
-//                    assert(t != nullptr);
-//                    auto res = tetrahedra_pool.get_index(t);
-//                    assert(res != -1);
-//                    return res;
-//                };
-//                data.cellList[j].cellattr[0] = face->disjoin_tet[0] != nullptr ? face->disjoin_tet[0]->static_index : face->disjoin_tet[1]->static_index;
-//                //assert(data.cellList[j].attr[0] == get_tet_index(face->disjoin_tet[0] != nullptr ? face->disjoin_tet[0] : face->disjoin_tet[1]));
-//                // assert(data.cellList[j].attr[0] >= 0);
-//            }
-//
-//            save_vtu((path_base + "/" + std::to_string(i) + ".vtu").c_str(), data);
-//
-//            data.free_self();
-//        }
+        for (int i = 0; i < phy_group_array.size(); i++) {
+            auto &phg = phy_group_array[i];
+            auto phg_vtx_array = phg.get_vtx();
+            FileData data;
+
+            data.numberOfPoints = phg_vtx_array.size();
+            data.pointList = new double[data.numberOfPoints * 3];
+
+            data.pointDataInt["bulk_node_ids"];
+            data.cellDataInt["bulk_element_ids"];
+
+            for (int j = 0; j < phg_vtx_array.size(); j++) {
+                const auto &vtx = phg_vtx_array[j];
+                data.pointList[j * 3] = vtx->position.x;
+                data.pointList[j * 3 + 1] = vtx->position.y;
+                data.pointList[j * 3 + 2] = vtx->position.z;
+                data.pointDataInt["bulk_node_ids"].content.push_back(vtx->static_index);
+            }
+
+            data.numberOfCell = phg.face_array.size();
+            data.cellList = new Cell[data.numberOfCell];
+
+            for (int j = 0; j < phg.face_array.size(); j++) {
+                const auto &face = phg.face_array[j];
+                data.cellList[j].pointList = new int[3];
+                data.cellList[j].numberOfPoints = 3;
+
+                //data.cellList[j].cellattr = new double[1];
+                auto it = std::find(phg_vtx_array.begin(), phg_vtx_array.end(), face->p1);
+                assert(it != phg_vtx_array.end());
+
+                data.cellList[j].pointList[0] = std::distance(phg_vtx_array.begin(), it);
+                it = std::find(phg_vtx_array.begin(), phg_vtx_array.end(), face->p2);
+                assert(it != phg_vtx_array.end());
+                data.cellList[j].pointList[1] = std::distance(phg_vtx_array.begin(), it);
+                it = std::find(phg_vtx_array.begin(), phg_vtx_array.end(), face->p3);
+                assert(it != phg_vtx_array.end());
+                data.cellList[j].pointList[2] = std::distance(phg_vtx_array.begin(), it);
+
+                data.cellDataInt["bulk_element_ids"].content.push_back(face->disjoin_tet[0] != nullptr ? face->disjoin_tet[0]->static_index : face->disjoin_tet[1]->static_index);
+            }
+            save_vtu((path_base + "/" + std::to_string(i) + ".vtu").c_str(), data);
+            //data.free_self();
+        }
         return true;
     }
 
@@ -463,13 +437,11 @@ struct Unwrap {
 };
 
 
-
-
 void Unwrap_01(Unwrap &uw) {
 
 
     //Step 1: Get mesh center
-    base_type::Vector3 center(0,0,0);
+    base_type::Vector3 center(0, 0, 0);
     auto uw_vtx_len = uw.vertex_pool.size();
     for (int i = 0; i < uw.vertex_pool.size(); i++) {
         auto v = (Vertex *) uw.vertex_pool[i];
@@ -480,7 +452,7 @@ void Unwrap_01(Unwrap &uw) {
 
     Face *six_direction_center_face[6] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};//x+-;y+-;z+-
     const base_type::Vector3 center_offset{0, 0, 0};
-    const base_type::Vector3 center_rotation{-50, 0, 0};
+    const base_type::Vector3 center_rotation{config.r_x, config.r_y, config.r_z};
     const double len = 5000;
     base_type::Vector3 axis_x = Rotate3d({1, 0, 0}, center_rotation.x, center_rotation.y, center_rotation.z);
     base_type::Vector3 axis_y = Rotate3d({0, 1, 0}, center_rotation.x, center_rotation.y, center_rotation.z);

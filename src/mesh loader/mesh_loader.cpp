@@ -29,7 +29,9 @@
 #include <vtkTetra.h>
 #include <vtkTriangle.h>
 #include <vtkStringArray.h>
-
+#include <vtkDoubleArray.h>
+#include <vtkFloatArray.h>
+#include <vtkUnsignedIntArray.h>
 
 #include "utils/file/file_path.h"
 #include "mesh_loader.h"
@@ -131,14 +133,14 @@ namespace Mesh_Loader {
         //Cell Data
         vtkCellData *g_celldata = g->GetCellData();
         int array_number = g_celldata->GetNumberOfArrays();
-        data.cellDataArray.resize(array_number);
+        //data.cellDataString.resize(array_number);
         for (int i = 0; i < array_number; i++) {
             vtkAbstractArray *array = g_celldata->GetAbstractArray(i);
             //g_celldata->GetAbstractArray(0)->GetDataType () -> 13
             //g_celldata->GetAbstractArray(0)->GetNumberOfValues() ->1558755
             ASSERT_MSG(array->GetDataType() == 13, "RROR: unsupport vtu celldata type, currently only support string!")
-            data.cellDataArray[i].name = array->GetName();
-            std::vector<std::string> &string_array = data.cellDataArray[i].content;
+            data.cellDataString[array->GetName()];
+            std::vector<std::string> &string_array = data.cellDataString[array->GetName()].content;
             string_array.resize(array->GetNumberOfValues());
             for (int j = 0; j < array->GetNumberOfValues(); j++) {
                 vtkStdString *vtkstring = (vtkStdString *) array->GetVoidPointer(j);
@@ -310,18 +312,18 @@ namespace Mesh_Loader {
 
 
         int slot_total_size = Z_slot_map.size() + F_slot_map.size();
-        data.cellDataArray.resize(slot_total_size);
+        //data.cellDataString.resize(slot_total_size);
         for (int i = 0; i < slot_total_size; i++) {
-            auto &data_array = data.cellDataArray[i];
+
             if (i < Z_slot_map.size()) {
                 // make z cellDataArray
                 auto it = Z_slot_map.begin();
                 std::advance(it, i);
-                data_array.name = it->first;
-                data_array.content.resize(data.numberOfCell);
+                data.cellDataString[it->first];
+                data.cellDataString[it->first].content.resize(data.numberOfCell);
                 for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
                     for (int j: iter->second) {
-                        data_array.content[tet_reindex_map[j]] = iter->first;
+                        data.cellDataString[it->first].content[tet_reindex_map[j]] = iter->first;
                     }
                 }
             }
@@ -329,13 +331,11 @@ namespace Mesh_Loader {
                 // make f cellDataArray
                 auto it = F_slot_map.begin();
                 std::advance(it, i - Z_slot_map.size());
-                data_array.name = it->first;
-                data_array.content.resize(data.numberOfCell);
+                data.cellDataString[it->first];
+                data.cellDataString[it->first].content.resize(data.numberOfCell);
                 for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
                     for (int j: iter->second) {
-                        if (triangle_reindex_map[j] == 0)
-                            int aaaa = 0;
-                        data_array.content[triangle_reindex_map[j]] = iter->first;
+                        data.cellDataString[it->first].content[triangle_reindex_map[j]] = iter->first;
                     }
                 }
             }
@@ -370,6 +370,7 @@ namespace Mesh_Loader {
         vtkNew<vtkTriangle> triangle;
         vtkNew<vtkCellArray> cellArray;
         vtkNew<vtkUnsignedCharArray> celltypes;
+
         celltypes->SetNumberOfComponents(1);
         celltypes->SetNumberOfValues(data.numberOfCell);
 
@@ -404,19 +405,147 @@ namespace Mesh_Loader {
         unstructuredGrid->SetPoints(points);
         unstructuredGrid->SetCells(celltypes, cellArray);
 
-        vtkCellData *g_celldata = unstructuredGrid->GetCellData();
-        for (int i = 0; i < data.cellDataArray.size(); i++) {
-            vtkStringArray *array = vtkStringArray::New();
+        {
+            //set celldata
+            vtkCellData *g_celldata = unstructuredGrid->GetCellData();
 
-            auto &celldata = data.cellDataArray[i];
+            for (auto iter = data.cellDataString.begin(); iter != data.cellDataString.end(); iter++) {
+                vtkStringArray *array = vtkStringArray::New();
 
-            array->SetName(celldata.name.c_str());
-            array->SetNumberOfValues(celldata.content.size());
-            for (int j = 0; j < celldata.content.size(); j++) {
-                array->SetValue(j, celldata.content[j].c_str());
+                array->SetName(iter->first.c_str());
+                array->SetNumberOfValues(iter->second.content.size());
+                for (int j = 0; j < iter->second.content.size(); j++) {
+                    array->SetValue(j, iter->second.content[j].c_str());
+                }
+                g_celldata->AddArray(array);
             }
-            g_celldata->AddArray(array);
-            //delete (array);
+
+            for (auto iter = data.cellDataDouble.begin(); iter != data.cellDataDouble.end(); iter++) {
+                vtkDoubleArray *array = vtkDoubleArray::New();
+
+                array->SetName(iter->first.c_str());
+                array->SetNumberOfValues(iter->second.content.size());
+                for (int j = 0; j < iter->second.content.size(); j++) {
+                    array->SetValue(j, iter->second.content[j]);
+                }
+                g_celldata->AddArray(array);
+            }
+
+            for (auto iter = data.cellDataFloat.begin(); iter != data.cellDataFloat.end(); iter++) {
+                vtkFloatArray *array = vtkFloatArray::New();
+
+                array->SetName(iter->first.c_str());
+                array->SetNumberOfValues(iter->second.content.size());
+                for (int j = 0; j < iter->second.content.size(); j++) {
+                    array->SetValue(j, iter->second.content[j]);
+                }
+                g_celldata->AddArray(array);
+            }
+
+            for (auto iter = data.cellDataInt.begin(); iter != data.cellDataInt.end(); iter++) {
+                vtkIntArray *array = vtkIntArray::New();
+
+                array->SetName(iter->first.c_str());
+                array->SetNumberOfValues(iter->second.content.size());
+                for (int j = 0; j < iter->second.content.size(); j++) {
+                    array->SetValue(j, iter->second.content[j]);
+                }
+                g_celldata->AddArray(array);
+            }
+
+            for (auto iter = data.cellDataUInt.begin(); iter != data.cellDataUInt.end(); iter++) {
+                vtkUnsignedIntArray *array = vtkUnsignedIntArray::New();
+
+                array->SetName(iter->first.c_str());
+                array->SetNumberOfValues(iter->second.content.size());
+                for (int j = 0; j < iter->second.content.size(); j++) {
+                    array->SetValue(j, iter->second.content[j]);
+                }
+                g_celldata->AddArray(array);
+            }
+
+            for (auto iter = data.cellDataBool.begin(); iter != data.cellDataBool.end(); iter++) {
+                vtkIntArray *array = vtkIntArray::New();
+
+                array->SetName(iter->first.c_str());
+                array->SetNumberOfValues(iter->second.content.size());
+                for (int j = 0; j < iter->second.content.size(); j++) {
+                    array->SetValue(j, iter->second.content[j]);
+                }
+                g_celldata->AddArray(array);
+            }
+
+        }
+
+        {
+            //set pointdata
+            vtkPointData *g_pointdata = unstructuredGrid->GetPointData();
+
+            for (auto iter = data.pointDataString.begin(); iter != data.pointDataString.end(); iter++) {
+                vtkStringArray *array = vtkStringArray::New();
+
+                array->SetName(iter->first.c_str());
+                array->SetNumberOfValues(iter->second.content.size());
+                for (int j = 0; j < iter->second.content.size(); j++) {
+                    array->SetValue(j, iter->second.content[j].c_str());
+                }
+                g_pointdata->AddArray(array);
+            }
+
+            for (auto iter = data.pointDataDouble.begin(); iter != data.pointDataDouble.end(); iter++) {
+                vtkDoubleArray *array = vtkDoubleArray::New();
+
+                array->SetName(iter->first.c_str());
+                array->SetNumberOfValues(iter->second.content.size());
+                for (int j = 0; j < iter->second.content.size(); j++) {
+                    array->SetValue(j, iter->second.content[j]);
+                }
+                g_pointdata->AddArray(array);
+            }
+
+            for (auto iter = data.pointDataFloat.begin(); iter != data.pointDataFloat.end(); iter++) {
+                vtkFloatArray *array = vtkFloatArray::New();
+
+                array->SetName(iter->first.c_str());
+                array->SetNumberOfValues(iter->second.content.size());
+                for (int j = 0; j < iter->second.content.size(); j++) {
+                    array->SetValue(j, iter->second.content[j]);
+                }
+                g_pointdata->AddArray(array);
+            }
+
+            for (auto iter = data.pointDataInt.begin(); iter != data.pointDataInt.end(); iter++) {
+                vtkIntArray *array = vtkIntArray::New();
+
+                array->SetName(iter->first.c_str());
+                array->SetNumberOfValues(iter->second.content.size());
+                for (int j = 0; j < iter->second.content.size(); j++) {
+                    array->SetValue(j, iter->second.content[j]);
+                }
+                g_pointdata->AddArray(array);
+            }
+
+            for (auto iter = data.pointDataUInt.begin(); iter != data.pointDataUInt.end(); iter++) {
+                vtkUnsignedIntArray *array = vtkUnsignedIntArray::New();
+
+                array->SetName(iter->first.c_str());
+                array->SetNumberOfValues(iter->second.content.size());
+                for (int j = 0; j < iter->second.content.size(); j++) {
+                    array->SetValue(j, iter->second.content[j]);
+                }
+                g_pointdata->AddArray(array);
+            }
+
+            for (auto iter = data.pointDataBool.begin(); iter != data.pointDataBool.end(); iter++) {
+                vtkIntArray *array = vtkIntArray::New();
+
+                array->SetName(iter->first.c_str());
+                array->SetNumberOfValues(iter->second.content.size());
+                for (int j = 0; j < iter->second.content.size(); j++) {
+                    array->SetValue(j, iter->second.content[j]);
+                }
+                g_pointdata->AddArray(array);
+            }
         }
 
         // Write file.
