@@ -5,11 +5,37 @@ convert .f3grid file to vtu and export six box-like boundary surface if possible
 
 ## How to use this tool
 * By download release: if you don't want to build code, you can download pre-build exe file directly, [link here](https://github.com/xmyhhh/f3grid_converter/releases)
+
+  <div align=center>
+  <img src="./pics/released.png" width="95%">
+  </div>
 * By compile code: the code compile is simple(A standard cmake project compile pipeline) and all dependency is included in this repository already(you dont need to manuly config any env things or extenal lib), below are some step to compile this code on windows PC
   - install git/vs studio(with c++ desktop development kit and cmake install)
   - git clone this repository by cmd `git clone https://github.com/xmyhhh/f3grid_converter.git`
   - open clone folder by vs studio, if everything is ok, a cmake scan will automaticaly begin
-  - after cmake scan, click and build the `MAIN` target
+    <div align=center>
+      <img src="./pics/open_by_vs.png" width="50%">
+    </div>
+    <div align=center>
+      <img src="./pics/cmake_scan.png" width="90%">
+    </div>
+
+  - after cmake scan, find the `MAIN` target
+    <div align=center>
+      <img src="./pics/cmake_target_0.png" width="50%">
+    </div>
+    <div align=center>
+      <img src="./pics/cmake_target_1.png" width="50%">
+    </div>
+
+  - click and build/debug the `MAIN` target
+    <div align=center>
+      <img src="./pics/build.png" width="50%">
+    </div>
+    <div align=center>
+      <img src="./pics/exe.png" width="80%">
+    </div>
+
 
 ## Usage
 * Step 1: Run the.exe directly, which will generate a.json file in the same location as the.exe.
