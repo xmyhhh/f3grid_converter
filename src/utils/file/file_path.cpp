@@ -7,10 +7,14 @@
 
 #include "utils/string/string_utils.h"
 
+
+
+
+
 std::string get_file_name(std::string file_path, bool with_extension) {
-    if(with_extension)
+    if (with_extension)
         return std::filesystem::path(file_path).filename().string();
-    else{
+    else {
         return std::filesystem::path(file_path).filename().replace_extension().string();
     }
 }
@@ -20,7 +24,8 @@ std::string get_file_extension(std::string file_path) {
     if (s_array.size() > 0) {
         auto file_name = s_array.back();
         return string_split(file_name, ".").back();
-    } else
+    }
+    else
         return file_path;
 }
 
