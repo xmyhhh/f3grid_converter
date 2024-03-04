@@ -168,6 +168,15 @@ namespace Mesh_Loader {
         struct Slot {
             //std::string slot_name;
             std::map<std::string, std::vector<int>> index_groups;
+            std::map<std::string, int> group_number;
+
+            void convert_to_number() {
+                int i = 0;
+                for (auto iter = index_groups.begin(); iter != index_groups.end(); iter++) {
+                    group_number[iter->first] = i++;
+                }
+            }
+
         };
         std::map<std::string, Slot> Z_slot_map;
         std::map<std::string, Slot> F_slot_map;
@@ -313,29 +322,60 @@ namespace Mesh_Loader {
 
         int slot_total_size = Z_slot_map.size() + F_slot_map.size();
         //data.cellDataString.resize(slot_total_size);
+
+
+
         for (int i = 0; i < slot_total_size; i++) {
 
             if (i < Z_slot_map.size()) {
                 // make z cellDataArray
                 auto it = Z_slot_map.begin();
                 std::advance(it, i);
-                data.cellDataString[it->first];
-                data.cellDataString[it->first].content.resize(data.numberOfCell);
-                for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
-                    for (int j: iter->second) {
-                        data.cellDataString[it->first].content[tet_reindex_map[j]] = iter->first;
+
+                if (config.array_to_number) {
+                    it->second.convert_to_number();
+                    data.cellDataInt[it->first];
+                    data.cellDataInt[it->first].content.resize(data.numberOfCell);
+                    for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
+                        for (int j: iter->second) {
+                            data.cellDataInt[it->first].content[tet_reindex_map[j]] = it->second.group_number[iter->first];
+                        }
                     }
                 }
+                else {
+                    data.cellDataString[it->first];
+                    data.cellDataString[it->first].content.resize(data.numberOfCell);
+                    for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
+                        for (int j: iter->second) {
+                            data.cellDataString[it->first].content[tet_reindex_map[j]] = iter->first;
+                        }
+                    }
+                }
+
+
             }
             else {
                 // make f cellDataArray
                 auto it = F_slot_map.begin();
                 std::advance(it, i - Z_slot_map.size());
-                data.cellDataString[it->first];
-                data.cellDataString[it->first].content.resize(data.numberOfCell);
-                for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
-                    for (int j: iter->second) {
-                        data.cellDataString[it->first].content[triangle_reindex_map[j]] = iter->first;
+
+                if (config.array_to_number) {
+                    it->second.convert_to_number();
+                    data.cellDataInt[it->first];
+                    data.cellDataInt[it->first].content.resize(data.numberOfCell);
+                    for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
+                        for (int j: iter->second) {
+                            data.cellDataInt[it->first].content[tet_reindex_map[j]] = it->second.group_number[iter->first];
+                        }
+                    }
+                }
+                else {
+                    data.cellDataString[it->first];
+                    data.cellDataString[it->first].content.resize(data.numberOfCell);
+                    for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
+                        for (int j: iter->second) {
+                            data.cellDataString[it->first].content[triangle_reindex_map[j]] = iter->first;
+                        }
                     }
                 }
             }
@@ -404,6 +444,7 @@ namespace Mesh_Loader {
         vtkNew<vtkUnstructuredGrid> unstructuredGrid;
         unstructuredGrid->SetPoints(points);
         unstructuredGrid->SetCells(celltypes, cellArray);
+
 
         {
             //set celldata
