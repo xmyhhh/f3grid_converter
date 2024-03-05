@@ -325,10 +325,7 @@ namespace Mesh_Loader {
         int slot_total_size = Z_slot_map.size() + F_slot_map.size();
         //data.cellDataString.resize(slot_total_size);
 
-
-
         for (int i = 0; i < slot_total_size; i++) {
-
             if (i < Z_slot_map.size()) {
                 // make z cellDataArray
                 auto it = Z_slot_map.begin();
@@ -338,6 +335,9 @@ namespace Mesh_Loader {
                     it->second.convert_to_number();
                     data.cellDataInt[it->first];
                     data.cellDataInt[it->first].content.resize(data.numberOfCell);
+                    for (auto iter = data.cellDataInt[it->first].content.begin(); iter != data.cellDataInt[it->first].content.end(); iter++){
+                        *iter = -1;
+                    }
                     for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
                         for (int j: iter->second) {
                             data.cellDataInt[it->first].content[tet_reindex_map[j]] = it->second.group_number[iter->first];
@@ -347,14 +347,15 @@ namespace Mesh_Loader {
                 else {
                     data.cellDataString[it->first];
                     data.cellDataString[it->first].content.resize(data.numberOfCell);
+                    for (auto iter = data.cellDataString[it->first].content.begin(); iter != data.cellDataString[it->first].content.end(); iter++){
+                        *iter = "";
+                    }
                     for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
                         for (int j: iter->second) {
                             data.cellDataString[it->first].content[tet_reindex_map[j]] = iter->first;
                         }
                     }
                 }
-
-
             }
             else {
                 // make f cellDataArray
@@ -365,15 +366,21 @@ namespace Mesh_Loader {
                     it->second.convert_to_number();
                     data.cellDataInt[it->first];
                     data.cellDataInt[it->first].content.resize(data.numberOfCell);
+                    for (auto iter = data.cellDataInt[it->first].content.begin(); iter != data.cellDataInt[it->first].content.end(); iter++){
+                        *iter = -1;
+                    }
                     for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
                         for (int j: iter->second) {
-                            data.cellDataInt[it->first].content[tet_reindex_map[j]] = it->second.group_number[iter->first];
+                            data.cellDataInt[it->first].content[triangle_reindex_map[j]] = it->second.group_number[iter->first];
                         }
                     }
                 }
                 else {
                     data.cellDataString[it->first];
                     data.cellDataString[it->first].content.resize(data.numberOfCell);
+                    for (auto iter = data.cellDataString[it->first].content.begin(); iter != data.cellDataString[it->first].content.end(); iter++){
+                        *iter = "";
+                    }
                     for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
                         for (int j: iter->second) {
                             data.cellDataString[it->first].content[triangle_reindex_map[j]] = iter->first;
