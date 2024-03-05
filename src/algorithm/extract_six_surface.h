@@ -215,7 +215,7 @@ struct Unwrap {
 
             }
 
-            //data.cellDataInt["MaterialIDs"];
+            data.cellDataUInt64["MaterialIDs"];
             data.numberOfCell = tetrahedra_pool.size();
             data.cellList = new Cell[data.numberOfCell];
             for (int j = 0; j < tetrahedra_pool.size(); j++) {
@@ -223,7 +223,7 @@ struct Unwrap {
                 data.cellList[j].pointList = new int[4];
                 data.cellList[j].numberOfPoints = 4;
 
-                //data.cellDataInt["MaterialIDs"].content.push_back(t->type_id - 1);
+                data.cellDataUInt64["MaterialIDs"].content.push_back(t->type_id - 1);
                 data.cellList[j].pointList[0] = t->p1->static_index;
                 data.cellList[j].pointList[1] = t->p2->static_index;
                 data.cellList[j].pointList[2] = t->p3->static_index;
@@ -242,15 +242,15 @@ struct Unwrap {
             data.numberOfPoints = phg_vtx_array.size();
             data.pointList = new double[data.numberOfPoints * 3];
 
-            data.pointDataInt["bulk_node_ids"];
-            data.cellDataInt["bulk_element_ids"];
+            data.pointDataUInt64["bulk_node_ids"];
+            data.pointDataUInt64["bulk_element_ids"];
 
             for (int j = 0; j < phg_vtx_array.size(); j++) {
                 const auto &vtx = phg_vtx_array[j];
                 data.pointList[j * 3] = vtx->position.x;
                 data.pointList[j * 3 + 1] = vtx->position.y;
                 data.pointList[j * 3 + 2] = vtx->position.z;
-                data.pointDataInt["bulk_node_ids"].content.push_back(vtx->static_index);
+                data.pointDataUInt64["bulk_node_ids"].content.push_back(vtx->static_index);
             }
 
             data.numberOfCell = phg.face_array.size();
@@ -273,7 +273,7 @@ struct Unwrap {
                 assert(it != phg_vtx_array.end());
                 data.cellList[j].pointList[2] = std::distance(phg_vtx_array.begin(), it);
 
-                data.cellDataInt["bulk_element_ids"].content.push_back(face->disjoin_tet[0] != nullptr ? face->disjoin_tet[0]->static_index : face->disjoin_tet[1]->static_index);
+                data.pointDataUInt64["bulk_element_ids"].content.push_back(face->disjoin_tet[0] != nullptr ? face->disjoin_tet[0]->static_index : face->disjoin_tet[1]->static_index);
             }
             save_vtu((path_base + "/" + std::to_string(i) + ".vtu").c_str(), data);
             //data.free_self();

@@ -38,6 +38,8 @@
 #include "utils/log/log.h"
 #include "utils/string/string_utils.h"
 #include "config/config_loader.h"
+#include "vtkUnsignedLongArray.h"
+#include "vtkUnsignedLongLongArray.h"
 
 
 #define  ASSERT_MSG(condition, msg) \
@@ -505,6 +507,17 @@ namespace Mesh_Loader {
                 g_celldata->AddArray(array);
             }
 
+            for (auto iter = data.cellDataUInt64.begin(); iter != data.cellDataUInt64.end(); iter++) {
+                vtkUnsignedLongLongArray *array = vtkUnsignedLongLongArray::New();
+
+                array->SetName(iter->first.c_str());
+                array->SetNumberOfValues(iter->second.content.size());
+                for (int j = 0; j < iter->second.content.size(); j++) {
+                    array->SetValue(j, iter->second.content[j]);
+                }
+                g_celldata->AddArray(array);
+            }
+
             for (auto iter = data.cellDataBool.begin(); iter != data.cellDataBool.end(); iter++) {
                 vtkIntArray *array = vtkIntArray::New();
 
@@ -557,6 +570,17 @@ namespace Mesh_Loader {
 
             for (auto iter = data.pointDataInt.begin(); iter != data.pointDataInt.end(); iter++) {
                 vtkIntArray *array = vtkIntArray::New();
+
+                array->SetName(iter->first.c_str());
+                array->SetNumberOfValues(iter->second.content.size());
+                for (int j = 0; j < iter->second.content.size(); j++) {
+                    array->SetValue(j, iter->second.content[j]);
+                }
+                g_pointdata->AddArray(array);
+            }
+
+            for (auto iter = data.pointDataUInt64.begin(); iter != data.pointDataUInt64.end(); iter++) {
+                vtkUnsignedLongLongArray *array = vtkUnsignedLongLongArray::New();
 
                 array->SetName(iter->first.c_str());
                 array->SetNumberOfValues(iter->second.content.size());

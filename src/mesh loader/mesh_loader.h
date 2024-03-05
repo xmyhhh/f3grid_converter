@@ -42,6 +42,7 @@ namespace Mesh_Loader {
         std::map<std::string, DataArray<double>> cellDataDouble;
         std::map<std::string, DataArray<float>> cellDataFloat;
         std::map<std::string, DataArray<int>> cellDataInt;
+        std::map<std::string, DataArray<unsigned long long>> cellDataUInt64;
         std::map<std::string, DataArray<unsigned int>> cellDataUInt;
         std::map<std::string, DataArray<bool>> cellDataBool;
 
@@ -50,6 +51,7 @@ namespace Mesh_Loader {
         std::map<std::string, DataArray<float>> pointDataFloat;
         std::map<std::string, DataArray<int>> pointDataInt;
         std::map<std::string, DataArray<unsigned int>> pointDataUInt;
+        std::map<std::string, DataArray<unsigned long long>> pointDataUInt64;
         std::map<std::string, DataArray<bool>> pointDataBool;
 
 
