@@ -336,11 +336,11 @@ namespace Mesh_Loader {
 
                 if (config.array_to_number) {
                     it->second.convert_to_number();
-                    data.cellDataUInt64[it->first];
-                    data.cellDataUInt64[it->first].content.resize(data.numberOfCell);
+                    data.cellDataInt[it->first];
+                    data.cellDataInt[it->first].content.resize(data.numberOfCell);
                     for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
                         for (int j: iter->second) {
-                            data.cellDataUInt64[it->first].content[tet_reindex_map[j]] = it->second.group_number[iter->first];
+                            data.cellDataInt[it->first].content[tet_reindex_map[j]] = it->second.group_number[iter->first];
                         }
                     }
                 }
@@ -363,11 +363,11 @@ namespace Mesh_Loader {
 
                 if (config.array_to_number) {
                     it->second.convert_to_number();
-                    data.cellDataUInt64[it->first];
-                    data.cellDataUInt64[it->first].content.resize(data.numberOfCell);
+                    data.cellDataInt[it->first];
+                    data.cellDataInt[it->first].content.resize(data.numberOfCell);
                     for (auto iter = it->second.index_groups.begin(); iter != it->second.index_groups.end(); iter++) {
                         for (int j: iter->second) {
-                            data.cellDataUInt64[it->first].content[tet_reindex_map[j]] = it->second.group_number[iter->first];
+                            data.cellDataInt[it->first].content[tet_reindex_map[j]] = it->second.group_number[iter->first];
                         }
                     }
                 }
