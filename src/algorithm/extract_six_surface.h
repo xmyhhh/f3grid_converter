@@ -192,8 +192,16 @@ struct Unwrap {
             base_type::Vertex *p3 = (base_type::Vertex *) vertex_pool[cell.pointList[2]];
             base_type::Vertex *p4 = (base_type::Vertex *) vertex_pool[cell.pointList[3]];
             auto t = base_type::Tetrahedra::allocate_from_pool(&tetrahedra_pool, p1, p2, p3, p4);
-            if (config.array_to_number)
-                t->type_id = data.cellDataInt.begin()->second.content[i];
+            if (config.array_to_number) {
+                if (config.export_materialids_using_slot < data.cellDataInt.size()) {
+                    auto iter = data.cellDataInt.begin();
+                    std::advance(iter, config.export_materialids_using_slot);
+                    t->type_id = iter->second.content[i];
+                }
+                else
+                    t->type_id = data.cellDataInt.begin()->second.content[i];
+            }
+
         }
         update_tet_neightbors();
         create_face_and_edge();

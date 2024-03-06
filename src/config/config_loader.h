@@ -18,6 +18,7 @@ struct Config {
     std::vector<std::string> input_file_path;
     std::string save_output_path;
     double r_x = 0, r_y = 0, r_z = 0;
+    int export_materialids_using_slot = 0;
 };
 
 

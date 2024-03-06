@@ -21,6 +21,7 @@ void Config_Loader::create_default_config_file(const std::string &path) {
     j["export_six_surface_setting"]["r_x"] = -50;
     j["export_six_surface_setting"]["r_y"] = 0;
     j["export_six_surface_setting"]["r_z"] = 0;
+    j["export_six_surface_setting"]["export_materialids_using_slot"] = 0;
 
     std::error_code err;
 
@@ -43,6 +44,7 @@ bool Config_Loader::load_config_file(const std::string &path, Config &c) {
     c.r_x = j["export_six_surface_setting"]["r_x"];
     c.r_y = j["export_six_surface_setting"]["r_y"];
     c.r_z = j["export_six_surface_setting"]["r_z"];
+    c.export_materialids_using_slot = j["export_six_surface_setting"]["export_materialids_using_slot"];
 
     if (j["input"]["input_file_path"].size() != 0) {
         for (std::string element: j["input"]["input_file_path"]) {
