@@ -252,8 +252,9 @@ struct Unwrap {
             data.numberOfPoints = phg_vtx_array.size();
             data.pointList = new double[data.numberOfPoints * 3];
 
+
             data.pointDataUInt64["bulk_node_ids"];
-            data.pointDataUInt64["bulk_element_ids"];
+            data.cellDataUInt64["bulk_element_ids"];
 
             for (int j = 0; j < phg_vtx_array.size(); j++) {
                 const auto &vtx = phg_vtx_array[j];
@@ -283,7 +284,7 @@ struct Unwrap {
                 assert(it != phg_vtx_array.end());
                 data.cellList[j].pointList[2] = std::distance(phg_vtx_array.begin(), it);
 
-                data.pointDataUInt64["bulk_element_ids"].content.push_back(face->disjoin_tet[0] != nullptr ? face->disjoin_tet[0]->static_index : face->disjoin_tet[1]->static_index);
+                data.cellDataUInt64["bulk_element_ids"].content.push_back(face->disjoin_tet[0] != nullptr ? face->disjoin_tet[0]->static_index : face->disjoin_tet[1]->static_index);
             }
             save_vtu((path_base + "/" + std::to_string(i) + ".vtu").c_str(), data);
             //data.free_self();
