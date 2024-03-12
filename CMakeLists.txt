@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
-project(TetGeo VERSION 0.1.0)
+project(MESH_CONVERTER VERSION 0.1.0)
 
 add_definitions(-DASSETS_DIR=\"${CMAKE_SOURCE_DIR}/asset/\")
 
